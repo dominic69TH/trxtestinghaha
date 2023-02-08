@@ -1,0 +1,27 @@
+const express = require('express');
+const crypto = require('crypto');
+const TronWeb = require('tronweb');
+
+const app = express();
+const tronWeb = new TronWeb({
+    fullNode: 'https://api.trongrid.io',
+    solidityNode: 'https://api.trongrid.io',
+    eventServer: 'https://api.trongrid.io'
+});
+
+app.get('/create-address', async (req, res) => {
+    const privateKey = crypto.randomBytes(32).toString('hex');
+    const publicKey = tronWeb.address.fromPrivateKey(privateKey);
+
+    const balance = await tronWeb.trx.getBalance(publicKey);
+
+    res.send({
+        privateKey,
+        publicKey,
+        balance: balance / 1000000 // Convert from Sun to TRX
+    });
+});
+
+app.listen(3000, () => {
+    console.log('API is running on http://localhost:3000');
+});
